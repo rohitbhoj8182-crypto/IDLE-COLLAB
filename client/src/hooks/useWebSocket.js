@@ -1,6 +1,9 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
+const defaultWsUrl = import.meta.env.VITE_WS_URL ?? (import.meta.env.MODE === 'development'
+  ? 'ws://localhost:3001'
+  : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`);
+const WS_URL = defaultWsUrl;
 const RECONNECT_DELAY_BASE = 1000;
 const MAX_RECONNECT_DELAY = 30000;
 const MAX_RECONNECT_ATTEMPTS = 10;

@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
@@ -28,17 +29,19 @@ app.use(compression());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 //CORS CONFIGURATION
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',');
+const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow no-origin requests (curl, Postman) and listed origins
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) return callback(null, true);
     callback(new Error(`CORS blocked: ${origin}`));
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));
+
+const clientDistPath = path.join(__dirname, '../../client/dist');
 
 // ── Body parsing middleware ───────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '1mb' }));
@@ -86,6 +89,14 @@ app.get('/api/health', (req, res) => {
     db: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
   });
 });
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/ws')) return next();
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
 
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 

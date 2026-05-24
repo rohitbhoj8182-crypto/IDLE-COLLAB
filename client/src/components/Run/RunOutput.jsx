@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+const SERVER_URL = import.meta.env.VITE_SERVER_URL ?? (import.meta.env.MODE === 'development' ? 'http://localhost:3001' : '');
 
 const RUNNABLE = ['javascript', 'python', 'bash', 'typescript'];
 

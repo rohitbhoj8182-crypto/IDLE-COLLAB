@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+const SERVER_URL = import.meta.env.VITE_SERVER_URL ?? (import.meta.env.MODE === 'development' ? 'http://localhost:3001' : '');
 const TOKEN_KEY = 'collab_ide_token';
 
 const AuthContext = createContext(null);
